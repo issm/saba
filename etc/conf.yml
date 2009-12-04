@@ -1,0 +1,34 @@
+---
+LOCATION:
+  PROTOCOL:  http
+  DOMAIN:    example.com
+  SUBDOMAIN: www.
+  PATH:      /saba
+
+PAGE:
+  COMMON_CSS: [_base, _layout, _additional]
+  COMMON_JS:  [_base, _additional]
+
+DSI:
+  DBI:  0
+  YAML: 1
+
+DB:
+  TYPE:   mysql
+  NAME:   dbname
+  HOST:   localhost
+  USER:   user
+  PASSWD: password
+  TABLE_PREFIX: pre_
+
+MAIL:
+  SERVER_SMTP: localhost:587
+  ADDRESS:
+    FROM: noreply@example.com
+    CC:
+  SIGNATURE: |
+    --
+    your email signature.
+
+
+CONTENT_TYPE_DEFAULT: text/html; charset=utf-8

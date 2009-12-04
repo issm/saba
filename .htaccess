@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteBase   /saba/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule .* index.cgi [L]
+</IfModule>
+
+<Files ~ "\.(?:pl|pm|yml|mt)$">
+Order deny,allow
+deny from all
+</Files>
+
+<Files ~ "^\.">
+Order deny,allow
+deny from all
+</Files>
