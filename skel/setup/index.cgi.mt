@@ -4,7 +4,7 @@ use warnings;
 use utf8;
 
 BEGIN {
-  unshift @INC, qw/lib extlib/;
+  unshift @INC, qw(saba/lib saba/extlib);
 }
 use Saba;
 

@@ -3,7 +3,11 @@ use strict;
 use warnings;
 use utf8;
 
+use FindBin;
 use Saba::ClassBase qw/:base :debug/;
+
+my $FILENAME_MAP = '.urlmap';
+my $bin = $FindBin::Bin;
 
 my $_conf     = {};
 my $_map_rule = [];
@@ -24,8 +28,7 @@ sub init {
 
   local $@;
   eval sprintf 'use %s qw/LoadFile/;', $_conf->{YAML_MODULE};
-
-  my $urlmapfile = sprintf '%s/urlmap.yml', $_conf->{PATH}{CONF};
+  my $urlmapfile = "$bin/${FILENAME_MAP}";
   my $map = LoadFile($urlmapfile);
   $_map_rule = $map->{ACTION} || {};
   $_map_var  = $map->{VAR}  || {};

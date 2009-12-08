@@ -1,6 +1,6 @@
 <IfModule mod_rewrite.c>
 RewriteEngine on
-RewriteBase   /saba/
+RewriteBase   <?= $request_path ?>/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* index.cgi [L]

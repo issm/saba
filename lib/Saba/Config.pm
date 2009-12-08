@@ -7,7 +7,7 @@ use FindBin;
 use Encode qw/is_utf8 encode decode/;
 use Saba::ClassBase qw/:base :debug/;
 
-my $FILENAME_CONF = 'conf.yml';
+my $FILENAME_CONF = '.saba';
 
 my $_conf = {};
 
@@ -23,7 +23,7 @@ sub new {
 sub init {
   my ($self) = @_;
 
-  my $bin = $FindBin::Bin;
+  my $bindir  = $FindBin::Bin;
   my $YAML_MODULE = '';
 
   local $@;
@@ -39,7 +39,7 @@ sub init {
     $YAML_MODULE = 'YAML';
   }
 
-  my $conffile = "$bin/etc/${FILENAME_CONF}";
+  my $conffile = "$bindir/${FILENAME_CONF}";
   if (-f $conffile) {
     $_conf = LoadFile($conffile)  or  warn $!;
   }
@@ -62,12 +62,12 @@ sub init {
 
   #
   $_conf->{PATH} =
-    {ROOT     => $bin,
-     CONF     => "$bin/etc",
-     ACTION   => "$bin/action",
-     MODEL    => "$bin/model",
-     TEMPLATE => "$bin/template",
-     TMP      => "$bin/tmp",
+    {ROOT     => $bindir,
+     CONF     => "$bindir/saba/etc",
+     ACTION   => "$bindir/action",
+     MODEL    => "$bindir/model",
+     TEMPLATE => "$bindir/template",
+     TMP      => "$bindir/tmp",
     };
 }
 

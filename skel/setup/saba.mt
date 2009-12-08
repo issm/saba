@@ -1,9 +1,9 @@
 ---
 LOCATION:
-  PROTOCOL:  http
-  DOMAIN:    example.com
-  SUBDOMAIN: www.
-  PATH:      /saba
+  PROTOCOL:  <?= $protocol ?>
+  DOMAIN:    <?= $server_name ?>
+  SUBDOMAIN:
+  PATH:      <?= $request_path ?>
 
 PAGE:
   COMMON_CSS: [_base, _layout, _additional]
