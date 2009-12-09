@@ -3,12 +3,5 @@ sub dsi_type { 'DBI'; }
 
 sub sample {
   my $self = shift;
-  $_dsi;
-
-  [ {id => 1, name => 'foo'},
-    {id => 2, name => 'bar'},
-    {id => 3, name => 'baz'},
-    {id => 4, name => 'hoge'},
-    {id => 5, name => 'fuga'},
-  ];
+  my $sel = $_dsi->q('@sample:sample__select[1,2]');
 }
