@@ -64,33 +64,45 @@ my $t;
 #
 # .saba を生成する
 #
-$t = $mt->render('saba')->as_string;
+$t = $mt->render('conf/saba')->as_string;
 save_file("$ROOTDIR/.saba", $t);
 
 #
 # .urlmap を生成する
 #
-$t = $mt->render('urlmap')->as_string;
+$t = $mt->render('conf/urlmap')->as_string;
 save_file("$ROOTDIR/.urlmap", $t);
 
 #
 # .htaccess を生成する
 #
-$t = $mt->render('htaccess')->as_string;
+$t = $mt->render('conf/htaccess')->as_string;
 save_file("$ROOTDIR/.htaccess", $t);
 
 #
 # index.cgi を生成する
 #
-$t = $mt->render('index.cgi')->as_string;
+$t = $mt->render('cgi/index.cgi')->as_string;
 save_file("$ROOTDIR/index.cgi", $t);
 chmod 0755, "$ROOTDIR/index.cgi";
+
+#
+# data ツリーを生成する
+#
+my $DATADIR = "$ROOTDIR/template";
+make_path $DATADIR;
+save_file("$DATADIR/yaml/sample.yml",
+          read_skel('data/yaml.mt'),
+         );
+save_file("$DATADIR/sql/sample.yml",
+          read_skel('data/sql.mt'),
+         );
 
 #
 # action ツリーを生成する
 #
 my $ACTIONDIR = "$ROOTDIR/action";
-$t = $mt->render('action')->as_string;
+$t = $mt->render('action/default')->as_string;
 make_path $ACTIONDIR;
 save_file("$ACTIONDIR/default.pl", $t);
 
@@ -98,8 +110,8 @@ save_file("$ACTIONDIR/default.pl", $t);
 # model ツリーを生成する
 #
 my $MODELDIR = "$ROOTDIR/model";
-$t = $mt->render('model.yaml')->as_string;
 make_path $MODELDIR;
+$t = $mt->render('model/yaml')->as_string;
 save_file("$MODELDIR/sample.pl", $t);
 
 #
@@ -108,16 +120,16 @@ save_file("$MODELDIR/sample.pl", $t);
 my $TEMPLATEDIR = "$ROOTDIR/template";
 make_path $TEMPLATEDIR;
 save_file("$TEMPLATEDIR/_base.mt",
-          read_skel('template._base.mt.mt'),
+          read_skel('template/_base.mt.mt'),
          );
 save_file("$TEMPLATEDIR/_error.mt",
-          read_skel('template._error.mt.mt'),
+          read_skel('template/_error.mt.mt'),
          );
 save_file("$TEMPLATEDIR/default.mt",
-          read_skel('template.default.mt.mt'),
+          read_skel('template/default.mt.mt'),
          );
 save_file("$TEMPLATEDIR/mail.mt",
-          read_skel('template.mail.mt.mt'),
+          read_skel('template/mail.mt.mt'),
          );
 
 #
@@ -126,7 +138,7 @@ save_file("$TEMPLATEDIR/mail.mt",
 my $CSSDIR = "$ROOTDIR/css";
 make_path $CSSDIR;
 save_file("$CSSDIR/_base.css",
-          read_skel('css._base.css.mt'),
+          read_skel('css/_base.css.mt'),
          );
 save_file("$CSSDIR/_layout.css", '');
 save_file("$CSSDIR/_layout-ie6.css", '');
@@ -137,7 +149,7 @@ save_file("$CSSDIR/_layout-ie6.css", '');
 my $JSDIR = "$ROOTDIR/js";
 make_path $JSDIR;
 save_file("$JSDIR/_base.js",
-          read_skel('js._base.js.mt'),
+          read_skel('js/_base.js.mt'),
          );
 save_file("$JSDIR/_base-ie6.js", '');
 

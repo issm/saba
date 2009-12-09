@@ -7,12 +7,15 @@ use base qw/Exporter/;
 use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw/md5_hex/;
 use Time::HiRes qw/gettimeofday/;
+use Encode;
 
 
 our @EXPORT = qw/self_param
                  name2path
                  generate_random_key
                  read_file
+                 en
+                 de
                  d
                  D
                 /;
@@ -21,6 +24,8 @@ our %EXPORT_TAGS =
                  name2path
                  generate_random_key
                  read_file
+                 en
+                 de
                 /],
     debug => [qw/d
                  D
@@ -97,4 +102,16 @@ sub read_file {
   close $fh;
 
   $buff;
+}
+
+
+#
+sub en {
+  encode('utf-8', shift || '');
+}
+
+#
+sub de {
+  my $t = shift || '';
+  decode('utf-8', $t);
 }
