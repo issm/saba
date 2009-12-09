@@ -89,8 +89,8 @@ chmod 0755, "$ROOTDIR/index.cgi";
 #
 # data ツリーを生成する
 #
-my $DATADIR = "$ROOTDIR/template";
-make_path $DATADIR;
+my $DATADIR = "$ROOTDIR/data";
+make_path (map "$DATADIR/$_", qw/yaml sql/);
 save_file("$DATADIR/yaml/sample.yml",
           read_skel('data/yaml.mt'),
          );
