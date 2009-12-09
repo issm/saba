@@ -159,7 +159,7 @@ sub query {
   elsif (ref $sql eq '') {
     # また，$sql が文字列かつ '@<name>:<key>[<limit>]' な書式の場合も load_sql メソッドを呼ぶ
     my ($name, $key, $limit) =
-      $sql =~ /\@ (\w+) : (\w+) (?:\[ (\d+ (?:, \d+)?) \])?/x;
+      $sql =~ /(\w+) :: (\w+) (?:\[ (\d+ (?:, \d+)?) \])?/x;
     if ($name  &&  $key) {
       $sql = $self->load_sql(name  => $name,
                              key   => $key,
@@ -303,7 +303,7 @@ sub load_sql {
   # limiit => $offset
   elsif (defined $limit
          &&  ref $limit eq '') {
-    $LIMIT = sprintf 'LIMIT %d', $limit;
+    $LIMIT = sprintf 'LIMIT %s', $limit;
   }
   else {
   }
