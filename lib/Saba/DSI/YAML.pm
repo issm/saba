@@ -5,7 +5,7 @@ use utf8;
 
 use Saba::ClassBase qw/:base :debug/;
 use DBI;
-use YAML;
+use YAML qw/LoadFile DumpFile/;
 use File::Basename;
 use File::Path qw/make_path/;
 
