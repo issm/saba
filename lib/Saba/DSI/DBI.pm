@@ -157,7 +157,7 @@ sub query {
     $sql = $self->load_sql( name => $sql->[0], key => $sql->[1], limit => $sql->[2] );
   }
   elsif (ref $sql eq '') {
-    # また，$sql が文字列かつ '@<name>:<key>[<limit>]' な書式の場合も load_sql メソッドを呼ぶ
+    # また，$sql が文字列かつ '<name>::<key>[<limit>]' な書式の場合も load_sql メソッドを呼ぶ
     my ($name, $key, $limit) =
       $sql =~ /(\w+) :: (\w+) (?:\[ (\d+ (?:, \d+)?) \])?/x;
     if ($name  &&  $key) {
