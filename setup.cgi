@@ -159,6 +159,12 @@ save_file("$JSDIR/_base-ie6.js", '');
 my $IMGDIR = "$ROOTDIR/img";
 make_path $IMGDIR;
 
+#
+# t ツリーを生成する
+#
+my $TESTDIR = "$ROOTDIR/t";
+make_path $TESTDIR;
+make_path "$TESTDIR/model", "$TESTDIR/action";
 
 
 print <DATA>;

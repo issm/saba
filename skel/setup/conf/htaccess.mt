@@ -6,7 +6,7 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* index.cgi [L]
 </IfModule>
 
-<Files ~ "\.(?:pl|pm|yml|mt)$">
+<Files ~ "\.(?:pl|pm|yml|mt|t)$">
 Order deny,allow
 deny from all
 </Files>

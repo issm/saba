@@ -23,7 +23,7 @@ sub new {
 sub init {
   my ($self) = @_;
 
-  my $bindir  = $FindBin::Bin;
+  my $bindir  = $ENV{SABA_EXEC_ROOT} || $FindBin::Bin;
   my $YAML_MODULE = '';
 
   local $@;

@@ -10,27 +10,32 @@ use Time::HiRes qw/gettimeofday/;
 use Encode;
 
 
-our @EXPORT = qw/self_param
-                 name2path
-                 generate_random_key
-                 read_file
-                 en
-                 de
-                 d
-                 D
+our @EXPORT = qw/
+                    self_param
+                    name2path
+                    generate_random_key
+                    read_file
+                    en
+                    de
+                    is_def
+                    d
+                    D
                 /;
-our %EXPORT_TAGS =
-  ( base  => [qw/self_param
-                 name2path
-                 generate_random_key
-                 read_file
-                 en
-                 de
+our %EXPORT_TAGS = (
+    base  => [qw/
+                    self_param
+                    name2path
+                    generate_random_key
+                    read_file
+                    en
+                    de
+                    is_def
                 /],
-    debug => [qw/d
-                 D
+    debug => [qw/
+                    d
+                    D
                 /],
-  );
+);
 
 
 
@@ -107,11 +112,26 @@ sub read_file {
 
 #
 sub en {
-  encode('utf-8', shift || '');
+    encode('utf-8', shift || '');
 }
 
 #
 sub de {
-  my $t = shift || '';
-  decode('utf-8', $t);
+    my $t = shift || '';
+    decode('utf-8', $t);
+}
+
+
+#
+sub is_def {
+    my @vars = @_;
+    return 0  unless @vars;
+
+    my $defined = 1;
+    while (@vars) {
+        my $v = shift @vars;
+        $defined &&= (defined $v ? 1 : 0);
+        last  unless $defined;
+    }
+    $defined;
 }
