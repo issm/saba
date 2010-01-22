@@ -4,6 +4,7 @@ use warnings;
 use utf8;
 
 use FindBin;
+use URI::Escape;
 use Saba::ClassBase qw/:base :debug/;
 
 my $FILENAME_MAP = '.urlmap';
@@ -37,7 +38,7 @@ sub init {
 
 sub _get_request_path {
   my ($self) = self_param @_;
-  my $req_path = $ENV{REQUEST_URI};
+  my $req_path = de uri_unescape $ENV{REQUEST_URI};
   $req_path =~ s/$_conf->{URL_ROOT}//;
   $req_path =~ s/$_conf->{LOCATION}{PATH}//;
   $req_path =~ s/\?.*$//;
@@ -58,7 +59,7 @@ sub get_action {
     my $name = $_a->{name};
 
     for my $_r (@{$_a->{rule}}) {
-      my $path_re = $_r->{path_re};
+      my $path_re = de $_r->{path_re};
       for my $_k_var (keys %$_map_var) {
         $path_re =~ s{
                        (?: \$$_k_var | \$\{$_k_var\} )

@@ -47,10 +47,12 @@ sub go {
   #
   my $mapper = Saba::URLMapper->new(conf => $_conf);
   my $action = $mapper->get_action;
-  $_query->{$_} = decode('utf-8',
-                         uri_unescape($action->{param}{$_})
-                        )
-    for keys %{$action->{param}};  # クエリをアペンドする
+  # v クエリをアペンドする
+  for my $k (keys %{$action->{param}}) {
+      my $v = uri_unescape $action->{param}{$k};
+      $v = de($v)  unless Encode::is_utf8($v);
+      $_query->{de $k} = $v;
+  }
 
   #
   my $action_name = $action->{name};
