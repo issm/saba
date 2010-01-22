@@ -61,11 +61,11 @@ sub get_action {
     for my $_r (@{$_a->{rule}}) {
       my $path_re = de $_r->{path_re};
       for my $_k_var (keys %$_map_var) {
-        $path_re =~ s{
-                       (?: \$$_k_var | \$\{$_k_var\} )
-                     }{
-                       $_map_var->{$_k_var};
-                     }gex;
+          $path_re =~ s{
+                           (?: \$$_k_var | \$\{$_k_var\} )
+                       }{
+                           de $_map_var->{$_k_var};
+                       }gex;
       }
 
       if (my @m = $req_path =~ /$path_re/x) {
