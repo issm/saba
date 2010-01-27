@@ -8,5 +8,10 @@ use Saba::ClassBase qw/:base :debug/;
 
 
 
+sub message {
+    my $self = shift;
+    sprintf '[%s] %s', $self->{-package}, $self->{-text};
+}
+
 
 1;

@@ -5,6 +5,8 @@ use utf8;
 
 use Encode;
 use Saba::ClassBase qw/:base :debug/;
+use Error qw/:try/;
+use Saba::Error::Model;
 
 my $_conf = {};
 my $_dsi  = {};
