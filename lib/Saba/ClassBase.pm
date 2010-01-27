@@ -8,6 +8,7 @@ use Data::Dumper qw/Dumper/;
 use Digest::MD5 qw/md5_hex/;
 use Time::HiRes qw/gettimeofday/;
 use Encode;
+use Error qw/:try/;
 
 
 our @EXPORT = qw/
@@ -118,7 +119,12 @@ sub en {
 #
 sub de {
     my $t = shift || '';
-    decode('utf-8', $t);
+    try {
+        return decode('utf-8', $t);
+    }
+    catch Error with {
+        return $t;
+    };
 }
 
 
