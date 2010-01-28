@@ -15,7 +15,8 @@ use Saba::MetaModel;
 
 my $conf = Saba::Config->new->get;
 my $mm   = Saba::MetaModel->new(conf => $conf);
-my $m    = $mm->get_model('entry');
+my $m    = $mm->get_model('<modelname>');
 
 
 ok 1;
+
