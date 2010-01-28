@@ -197,16 +197,16 @@ msg("mkdir: $IMGDIR");
 #
 my $TESTDIR = "$ROOTDIR/t";
 make_path $TESTDIR;
-make_path "$TESTDIR/model", "$TESTDIR/action";
 save_file("$TESTDIR/00_load.t", read_skel("t/load.t.mt"));
+make_path "$TESTDIR/01_model", "$TESTDIR/02_action";
 $t = $mt->render('t/prove.sh')->as_string;
 save_file("$ROOTDIR/.prove.sh", $t);
 chmod 0755, "$ROOTDIR/.prove.sh";
 #
 msg("mkdir: $TESTDIR");
-msg("mkdir: $TESTDIR/model");
-msg("mkdir: $TESTDIR/action");
 msg("saved: $TESTDIR/00_load.t");
+msg("mkdir: $TESTDIR/01_model");
+msg("mkdir: $TESTDIR/02_action");
 msg("saved: $ROOTDIR/.prove.sh");
 msg("chmod: $ROOTDIR/.prove.sh as '755'");
 
