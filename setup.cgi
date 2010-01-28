@@ -4,7 +4,7 @@ use warnings;
 use utf8;
 
 BEGIN {
-  unshift @INC, qw/lib extlib/;
+    unshift @INC, qw/lib extlib/;
 }
 
 use FindBin;
@@ -12,15 +12,21 @@ use File::Path qw/make_path/;
 use Text::MicroTemplate::Extended;
 use Data::Dumper;
 
-my $MODE    = 'CLI';  # CLI or CGI
+my $MODE    = defined $ENV{SERVER_NAME} ? 'CGI' : 'CLI';  # CLI or CGI
 my $BINDIR  = $FindBin::Bin;
 my $ROOTDIR = sprintf '%s/..', $BINDIR;
+
+my $CONTENT_TYPE = "Content-Type: text/plain; charset=utf-8\n";
+my $MESSAGE      = '';
+
+$CONTENT_TYPE = ''  if $MODE eq 'CLI';
+
 
 #
 # .saba が存在する場合，セットアップを中止する
 #
 if (-f "$ROOTDIR/.saba") {
-  abort_setup();
+    abort_setup();
 }
 
 
@@ -28,19 +34,19 @@ my ($protocol, $server_name, $subdomain, $request_path);
 #
 #
 #
-if (defined $ENV{SERVER_NAME}) {
-  $MODE = 'CGI';
-  ($protocol = lc $ENV{SERVER_PROTOCOL}) =~ s{/.*$}{};
-  $server_name = $ENV{SERVER_NAME};
-  $subdomain = '';
-  ($request_path = $ENV{SCRIPT_NAME}) =~ s{/saba/setup\.cgi}{};
+if ($MODE eq 'CGI') {
+    ($protocol = lc $ENV{SERVER_PROTOCOL}) =~ s{/.*$}{};
+    $server_name = $ENV{SERVER_NAME};
+    $subdomain = '';
+    ($request_path = $ENV{SCRIPT_NAME}) =~ s{/saba/setup\.cgi}{};
 }
 else {
-  ($protocol,
-   $server_name,
-   $subdomain,
-   $request_path,
-  ) = stdin_params();
+    (
+        $protocol,
+        $server_name,
+        $subdomain,
+        $request_path,
+    ) = stdin_params();
 }
 
 
@@ -54,6 +60,7 @@ my $SKELDIR = "$BINDIR/skel/setup";
 my $mt = Text::MicroTemplate::Extended->new(
     include_path  => [$SKELDIR],
     template_args => {
+        ROOTDIR      => $ROOTDIR,
         protocol     => $protocol,
         server_name  => $server_name,
         subdomain    => $subdomain,
@@ -95,12 +102,8 @@ chmod 0755, "$ROOTDIR/index.cgi";
 #
 my $DATADIR = "$ROOTDIR/data";
 make_path (map "$DATADIR/$_", qw/yaml sql/);
-save_file("$DATADIR/yaml/sample.yml",
-          read_skel('data/yaml.mt'),
-         );
-save_file("$DATADIR/sql/sample.yml",
-          read_skel('data/sql.mt'),
-         );
+save_file("$DATADIR/yaml/sample.yml", read_skel('data/yaml.mt'));
+save_file("$DATADIR/sql/sample.yml", read_skel('data/sql.mt'));
 
 #
 # action ツリーを生成する
@@ -123,27 +126,17 @@ save_file("$MODELDIR/sample.pl", $t);
 #
 my $TEMPLATEDIR = "$ROOTDIR/template";
 make_path $TEMPLATEDIR;
-save_file("$TEMPLATEDIR/_base.mt",
-          read_skel('template/_base.mt.mt'),
-         );
-save_file("$TEMPLATEDIR/_error.mt",
-          read_skel('template/_error.mt.mt'),
-         );
-save_file("$TEMPLATEDIR/default.mt",
-          read_skel('template/default.mt.mt'),
-         );
-save_file("$TEMPLATEDIR/mail.mt",
-          read_skel('template/mail.mt.mt'),
-         );
+save_file("$TEMPLATEDIR/_base.mt", read_skel('template/_base.mt.mt'));
+save_file("$TEMPLATEDIR/_error.mt", read_skel('template/_error.mt.mt'));
+save_file("$TEMPLATEDIR/default.mt", read_skel('template/default.mt.mt'));
+save_file("$TEMPLATEDIR/mail.mt", read_skel('template/mail.mt.mt'));
 
 #
 # css ツリーを生成する
 #
 my $CSSDIR = "$ROOTDIR/css";
 make_path $CSSDIR;
-save_file("$CSSDIR/_base.css",
-          read_skel('css/_base.css.mt'),
-         );
+save_file("$CSSDIR/_base.css", read_skel('css/_base.css.mt'));
 save_file("$CSSDIR/_layout.css", '');
 save_file("$CSSDIR/_layout-ie6.css", '');
 
@@ -152,9 +145,7 @@ save_file("$CSSDIR/_layout-ie6.css", '');
 #
 my $JSDIR = "$ROOTDIR/js";
 make_path $JSDIR;
-save_file("$JSDIR/_base.js",
-          read_skel('js/_base.js.mt'),
-         );
+save_file("$JSDIR/_base.js", read_skel('js/_base.js.mt'));
 save_file("$JSDIR/_base-ie6.js", '');
 
 #
@@ -169,7 +160,8 @@ make_path $IMGDIR;
 my $TESTDIR = "$ROOTDIR/t";
 make_path $TESTDIR;
 make_path "$TESTDIR/model", "$TESTDIR/action";
-
+save_file("$TESTDIR/00_load.t", read_skel("t/load.t.mt"));
+save_file("$ROOTDIR/.prove.sh", read_skel("t/prove.sh.mt"));
 
 print <DATA>;
 exit;
@@ -177,51 +169,55 @@ exit;
 
 
 sub abort_setup {
-  print << "...";
-Content-Type: text/plain; charset=utf-8
-
+    print << "...";
+$CONTENT_TYPE
 Already setup, abort.
 ...
-  exit;
+    exit;
 }
 
 
 sub stdin_params {
-  print "protocol? [http]: ";
-  chomp(my $protocol = <STDIN>);
+    print "protocol? [http]: ";
+    chomp(my $protocol = <STDIN>);
 
-  print "domain? [localhost]: ";
-  chomp(my $server_name = <STDIN>);
+    print "domain? [localhost]: ";
+    chomp(my $server_name = <STDIN>);
 
-  print "subdomain? (if specify, include '.' at end, ex. 'www.') []: ";
-  chomp(my $subdomain = <STDIN>);
-  if ($subdomain ne '' and $subdomain !~ /\.$/) {
-    $subdomain .= '.';
-  }
+    print "subdomain? (if specify, include '.' at end, ex. 'www.') []: ";
+    chomp(my $subdomain = <STDIN>);
+    if ($subdomain ne '' and $subdomain !~ /\.$/) {
+        $subdomain .= '.';
+    }
 
-  print "path? []: ";
-  chomp(my $request_path = <STDIN>);
+    print "path? []: ";
+    chomp(my $request_path = <STDIN>);
 
-  ($protocol, $server_name, $subdomain, $request_path);
+    (
+        $protocol,
+        $server_name,
+        $subdomain,
+        $request_path,
+    );
 }
 
 
 sub read_skel {
-  my ($f) = @_;
-  local $/;
-  open my $fh, '<', "$SKELDIR/$f"  or  die $!;
-  my $t = <$fh>;
-  close $fh;
-  $t;
+    my ($f) = @_;
+    local $/;
+    open my $fh, '<', "$SKELDIR/$f"  or  die $!;
+    my $t = <$fh>;
+    close $fh;
+    $t;
 }
 
 sub save_file {
-  my ($f, $t) = @_;
-  return undef  unless defined $f && defined $t;
-  open my $fh, '>', $f;
-  print $fh $t;
-  close $fh;
-  1;
+    my ($f, $t) = @_;
+    return undef  unless defined $f && defined $t;
+    open my $fh, '>', $f;
+    print $fh $t;
+    close $fh;
+    1;
 }
 
 
@@ -229,7 +225,6 @@ sub save_file {
 
 
 __DATA__
-Content-Type: text/plain; charset=utf-8
-
-
+$CONTENT_TYPE
+$MESSAGE
 Setup finished.
