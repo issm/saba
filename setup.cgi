@@ -14,10 +14,12 @@ use Data::Dumper;
 
 my $MODE    = defined $ENV{SERVER_NAME} ? 'CGI' : 'CLI';  # CLI or CGI
 my $BINDIR  = $FindBin::Bin;
-my $ROOTDIR = sprintf '%s/..', $BINDIR;
+#my $ROOTDIR = sprintf '%s/..', $BINDIR;
+(my $ROOTDIR = $BINDIR) =~ s{/[^/]+$}{};
+
 
 my $CONTENT_TYPE = "Content-Type: text/plain; charset=utf-8\n";
-my $MESSAGE      = '';
+my ($MESSAGE, @MESSAGES) = ('', ());
 
 $CONTENT_TYPE = ''  if $MODE eq 'CLI';
 
@@ -77,18 +79,24 @@ my $t;
 #
 $t = $mt->render('conf/saba')->as_string;
 save_file("$ROOTDIR/.saba", $t);
+#
+msg("saved: $ROOTDIR/.saba");
 
 #
 # .urlmap を生成する
 #
 $t = $mt->render('conf/urlmap')->as_string;
 save_file("$ROOTDIR/.urlmap", $t);
+#
+msg("saved: $ROOTDIR/.urlmap");
 
 #
 # .htaccess を生成する
 #
 $t = $mt->render('conf/htaccess')->as_string;
 save_file("$ROOTDIR/.htaccess", $t);
+#
+msg("saved: $ROOTDIR/.htaccess");
 
 #
 # index.cgi を生成する
@@ -96,6 +104,9 @@ save_file("$ROOTDIR/.htaccess", $t);
 $t = $mt->render('cgi/index.cgi')->as_string;
 save_file("$ROOTDIR/index.cgi", $t);
 chmod 0755, "$ROOTDIR/index.cgi";
+#
+msg("saved: $ROOTDIR/index.cgi");
+msg("chmod: $ROOTDIR/index.cgi as '755'");
 
 #
 # data ツリーを生成する
@@ -104,6 +115,10 @@ my $DATADIR = "$ROOTDIR/data";
 make_path (map "$DATADIR/$_", qw/yaml sql/);
 save_file("$DATADIR/yaml/sample.yml", read_skel('data/yaml.mt'));
 save_file("$DATADIR/sql/sample.yml", read_skel('data/sql.mt'));
+#
+msg("mkdir: $DATADIR");
+msg("saved: $DATADIR/yaml/sample.yml");
+msg("saved: $DATADIR/sql/sample.yml");
 
 #
 # action ツリーを生成する
@@ -112,6 +127,9 @@ my $ACTIONDIR = "$ROOTDIR/action";
 $t = $mt->render('action/default')->as_string;
 make_path $ACTIONDIR;
 save_file("$ACTIONDIR/default.pl", $t);
+#
+msg("mkdir: $ACTIONDIR");
+msg("saved: $ACTIONDIR/default.pl");
 
 #
 # model ツリーを生成する
@@ -120,6 +138,9 @@ my $MODELDIR = "$ROOTDIR/model";
 make_path $MODELDIR;
 $t = $mt->render('model/yaml')->as_string;
 save_file("$MODELDIR/sample.pl", $t);
+#
+msg("mkdir: $MODELDIR");
+msg("saved: $MODELDIR/sample.pl");
 
 #
 # template ツリーを生成する
@@ -130,6 +151,12 @@ save_file("$TEMPLATEDIR/_base.mt", read_skel('template/_base.mt.mt'));
 save_file("$TEMPLATEDIR/_error.mt", read_skel('template/_error.mt.mt'));
 save_file("$TEMPLATEDIR/default.mt", read_skel('template/default.mt.mt'));
 save_file("$TEMPLATEDIR/mail.mt", read_skel('template/mail.mt.mt'));
+#
+msg("mkdir: $TEMPLATEDIR");
+msg("saved: $TEMPLATEDIR/_base.mt");
+msg("saved: $TEMPLATEDIR/_error.mt");
+msg("saved: $TEMPLATEDIR/default.mt");
+msg("saved: $TEMPLATEDIR/mail.mt");
 
 #
 # css ツリーを生成する
@@ -139,6 +166,11 @@ make_path $CSSDIR;
 save_file("$CSSDIR/_base.css", read_skel('css/_base.css.mt'));
 save_file("$CSSDIR/_layout.css", '');
 save_file("$CSSDIR/_layout-ie6.css", '');
+#
+msg("mkdir: $CSSDIR");
+msg("saved: $CSSDIR/_base.css");
+msg("saved: $CSSDIR/_layout.css");
+msg("saved: $CSSDIR/_layout-ie6.css");
 
 #
 # js ツリーを生成する
@@ -147,12 +179,18 @@ my $JSDIR = "$ROOTDIR/js";
 make_path $JSDIR;
 save_file("$JSDIR/_base.js", read_skel('js/_base.js.mt'));
 save_file("$JSDIR/_base-ie6.js", '');
+#
+msg("mkdir: $JSDIR");
+msg("saved: $JSDIR/_base.js");
+msg("saved: $JSDIR/_base-ie6.js");
 
 #
 # img ツリーを生成する
 #
 my $IMGDIR = "$ROOTDIR/img";
 make_path $IMGDIR;
+#
+msg("mkdir: $IMGDIR");
 
 #
 # t ツリーを生成する
@@ -161,9 +199,26 @@ my $TESTDIR = "$ROOTDIR/t";
 make_path $TESTDIR;
 make_path "$TESTDIR/model", "$TESTDIR/action";
 save_file("$TESTDIR/00_load.t", read_skel("t/load.t.mt"));
-save_file("$ROOTDIR/.prove.sh", read_skel("t/prove.sh.mt"));
+$t = $mt->render('t/prove.sh')->as_string;
+save_file("$ROOTDIR/.prove.sh", $t);
+chmod 0755, "$ROOTDIR/.prove.sh";
+#
+msg("mkdir: $TESTDIR");
+msg("mkdir: $TESTDIR/model");
+msg("mkdir: $TESTDIR/action");
+msg("saved: $TESTDIR/00_load.t");
+msg("saved: $ROOTDIR/.prove.sh");
+msg("chmod: $ROOTDIR/.prove.sh as '755'");
 
-print <DATA>;
+
+
+$MESSAGE = join "\n", @MESSAGES;
+print << "...";
+$CONTENT_TYPE
+$MESSAGE
+
+Setup finished.
+...
 exit;
 
 
@@ -178,19 +233,21 @@ Already setup, abort.
 
 
 sub stdin_params {
-    print "protocol? [http]: ";
+    print "Install path: $ROOTDIR\n\n";
+
+    print "* protocol? [http]: ";
     chomp(my $protocol = <STDIN>);
 
-    print "domain? [localhost]: ";
+    print "* domain? [localhost]: ";
     chomp(my $server_name = <STDIN>);
 
-    print "subdomain? (if specify, include '.' at end, ex. 'www.') []: ";
+    print "* subdomain? (ex. 'www.') []: ";
     chomp(my $subdomain = <STDIN>);
     if ($subdomain ne '' and $subdomain !~ /\.$/) {
         $subdomain .= '.';
     }
 
-    print "path? []: ";
+    print "* path? []: ";
     chomp(my $request_path = <STDIN>);
 
     (
@@ -199,6 +256,10 @@ sub stdin_params {
         $subdomain,
         $request_path,
     );
+}
+
+sub msg {
+    push @MESSAGES, sprintf(shift, @_);
 }
 
 
@@ -224,7 +285,4 @@ sub save_file {
 
 
 
-__DATA__
-$CONTENT_TYPE
-$MESSAGE
-Setup finished.
+__END__
