@@ -24,7 +24,7 @@ if (-f "$ROOTDIR/.saba") {
 }
 
 
-my ($protocol, $server_name, $request_path);
+my ($protocol, $server_name, $subdomain, $request_path);
 #
 #
 #
@@ -32,11 +32,13 @@ if (defined $ENV{SERVER_NAME}) {
   $MODE = 'CGI';
   ($protocol = lc $ENV{SERVER_PROTOCOL}) =~ s{/.*$}{};
   $server_name = $ENV{SERVER_NAME};
+  $subdomain = '';
   ($request_path = $ENV{SCRIPT_NAME}) =~ s{/saba/setup\.cgi}{};
 }
 else {
   ($protocol,
    $server_name,
+   $subdomain,
    $request_path,
   ) = stdin_params();
 }
@@ -44,6 +46,7 @@ else {
 
 $protocol     ||= 'http';
 $server_name  ||= 'localhost';
+$subdomain    ||= '';
 $request_path ||= '';
 
 
@@ -53,6 +56,7 @@ my $mt = Text::MicroTemplate::Extended->new(
     template_args => {
         protocol     => $protocol,
         server_name  => $server_name,
+        subdomain    => $subdomain,
         request_path => $request_path,
         env          => \%ENV,
     },
@@ -189,10 +193,16 @@ sub stdin_params {
   print "domain? [localhost]: ";
   chomp(my $server_name = <STDIN>);
 
+  print "subdomain? (if specify, include '.' at end, ex. 'www.') []: ";
+  chomp(my $subdomain = <STDIN>);
+  if ($subdomain ne '' and $subdomain !~ /\.$/) {
+    $subdomain .= '.';
+  }
+
   print "path? []: ";
   chomp(my $request_path = <STDIN>);
 
-  ($protocol, $server_name, $request_path);
+  ($protocol, $server_name, $subdomain, $request_path);
 }
 
 
