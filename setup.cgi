@@ -151,12 +151,18 @@ save_file("$TEMPLATEDIR/_base.mt", read_skel('template/_base.mt.mt'));
 save_file("$TEMPLATEDIR/_error.mt", read_skel('template/_error.mt.mt'));
 save_file("$TEMPLATEDIR/default.mt", read_skel('template/default.mt.mt'));
 save_file("$TEMPLATEDIR/mail.mt", read_skel('template/mail.mt.mt'));
+make_path "$TEMPLATEDIR/_status";
+save_file("$TEMPLATEDIR/_status/403.mt", read_skel('template/_status/403.mt.mt'));
+save_file("$TEMPLATEDIR/_status/404.mt", read_skel('template/_status/404.mt.mt'));
 #
 msg("mkdir: $TEMPLATEDIR");
 msg("saved: $TEMPLATEDIR/_base.mt");
 msg("saved: $TEMPLATEDIR/_error.mt");
 msg("saved: $TEMPLATEDIR/default.mt");
 msg("saved: $TEMPLATEDIR/mail.mt");
+msg("mkdir: $TEMPLATEDIR/_status");
+msg("saved: $TEMPLATEDIR/_status/403.mt");
+msg("saved: $TEMPLATEDIR/_status/404.mt");
 
 #
 # css ツリーを生成する
