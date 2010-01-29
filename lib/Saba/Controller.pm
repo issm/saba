@@ -56,12 +56,16 @@ sub go {
 
   #
   my $action_name = $action->{name};
-  my $view =
-    $self->_action($action_name);
+  my $view;
 
-  #
+  if (defined $action_name && $action_name ne '') {
+      $view = $self->_action($action_name);
+  }
+  else {
+      $view = $_http->status(404);
+  }
+
   $self->_view($view);
-
 }
 
 

@@ -101,8 +101,24 @@ sub header {
 sub redirect {
   my ($self, $to) = @_;
   return undef  unless defined $to;
-  $self->add_header(status   => 301,
-                    location => $to,
-                   );
+  $self->status(301, {location => $to});
   1;
+}
+
+
+
+# status($code, \%opts);
+sub status {
+    my ($self, $code, $opts) = @_;
+    $code = sprintf '%03d', $code;
+
+    $self->add_header(
+        status => $code,
+        %{$opts || {}},
+    );
+
+    # v viewフォーマット
+    return +{
+        name => '_status_' . $code,
+    };
 }

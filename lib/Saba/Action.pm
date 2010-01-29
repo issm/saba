@@ -55,7 +55,6 @@ sub go {
   eval $action_pl;
   warn $@  if $@;
 
-
   my $ret_action = '';
 
   my $METH_IF = { GET  => 1,
