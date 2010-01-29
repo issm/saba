@@ -129,6 +129,9 @@ sub status {
 sub cookie {
     my ($self, $name, $value) = @_;
     my $req = $self->{_req};
+
+    $name  = en $name;
+
     #
     # setter
     #
