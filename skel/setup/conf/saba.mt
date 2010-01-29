@@ -26,6 +26,12 @@ CACHE:
   NAMESPACE: <?= $subdomain; ?><?= $server_name; ?>
   EXPIRES:   600
 
+COOKIE:
+  EXPIRES: +14d
+  DOMAIN:  
+  PATH:
+  SECURE:  0
+
 MAIL:
   SERVER_SMTP: localhost:587
   ADDRESS:

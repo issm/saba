@@ -33,7 +33,7 @@ sub new {
 sub init {
   my ($self) = self_param @_;
   $_conf = Saba::Config->new->get;
-  $_http = Saba::HTTP->new(conf => $_conf);
+  $_http = Saba::HTTP->new(req => $self->{_req}, conf => $_conf);
   $_mm   = Saba::MetaModel->new(conf => $_conf);
 
   if ($_conf->{CACHE}{ENABLED}) {

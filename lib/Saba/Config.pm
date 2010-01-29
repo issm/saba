@@ -60,7 +60,7 @@ sub init {
             $_conf->{LOCATION}{DOMAIN}    || '',
            );
 
-  #
+  # PATH
   $_conf->{PATH} =
     {ROOT     => $bindir,
      CONF     => "$bindir/saba/etc",
@@ -70,6 +70,20 @@ sub init {
      TEMPLATE => "$bindir/template",
      TMP      => "$bindir/tmp",
     };
+
+  # COOKIE
+  unless (defined $_conf->{COOKIE}{DOMAON}) {
+      $_conf->{COOKIE}{DOMAIN} = sprintf(
+          '%s%s',
+          $_conf->{LOCATION}{SUBDOMAIN},
+          $_conf->{LOCATION}{DOMAIN},
+      );
+  }
+  unless (defined $_conf->{COOKIE}{PATH}) {
+      $_conf->{COOKIE}{PATH} =
+          sprintf '%s/', $_conf->{LOCATION}{PATH};
+      $_conf->{COOKIE}{PATH} =~ s{^/(.+/)$}{$1};
+  }
 }
 
 

@@ -122,3 +122,56 @@ sub status {
         name => '_status_' . $code,
     };
 }
+
+
+# cookie($name);
+# cookie($name, $value);
+sub cookie {
+    my ($self, $name, $value) = @_;
+    my $req = $self->{_req};
+    #
+    # setter
+    #
+    if (defined $value) {
+        $value = en $value;
+
+        my %param_cookie = (
+            -name    => $name,
+            -value   => $value,
+            -domain  => $_conf->{COOKIE}{DOMAIN},
+            -path    => $_conf->{COOKIE}{PATH},
+            -secure  => $_conf->{COOKIE}{SECURE},
+        );
+        $param_cookie{-expires} = $_conf->{COOKIE}{EXPIRES}
+            if $_conf->{COOKIE}{EXPIRES} ne '';
+
+        my $cookie = $req->cookie(%param_cookie);
+        $self->add_header(
+            set_cookie => $cookie->as_string,
+        );
+        return $cookie;
+    }
+    #
+    # getter
+    #
+    else {
+        return de $req->cookie($name);
+    }
+}
+# remove_cookie($name);
+sub remove_cookie {
+    my ($self, $name) = @_;
+    my $req = $self->{_req};
+    my $cookie = $req->cookie(
+        -name    => $name,
+        -value   => '',
+        -expires => -1,
+        -domain  => $_conf->{COOKIE}{DOMAIN},
+        -path    => $_conf->{COOKIE}{PATH},
+        -secure  => $_conf->{COOKIE}{SECURE},
+    );
+    $self->add_header(
+        set_cookie => $cookie->as_string,
+    );
+    $cookie;
+}
