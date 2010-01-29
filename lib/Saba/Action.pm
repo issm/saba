@@ -16,6 +16,7 @@ my $_mm    = {};
 my $_query = {};
 my $_var   = {};
 my $_http;
+my $_cache;
 
 sub new {
   my ($self, $class, %param) = ({}, shift, @_);
@@ -32,6 +33,7 @@ sub init {
   $_mm    = $self->{_mm};
   $_query = $self->{_query};
   $_http  = $self->{_http};
+  $_cache = $self->{_cache};
   $self;
 }
 
@@ -41,6 +43,7 @@ sub go {
   eval $_mm;
   eval $_query;
   eval $_http;
+  eval $_cache;
 
   local $@;
 

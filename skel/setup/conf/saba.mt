@@ -21,6 +21,11 @@ DB:
   PASSWD: password
   TABLE_PREFIX: pre_
 
+CACHE:
+  ENABLED:   <?= $cache_enabled; ?>
+  NAMESPACE: <?= $subdomain; ?><?= $server_name; ?>
+  EXPIRES:   600
+
 MAIL:
   SERVER_SMTP: localhost:587
   ADDRESS:

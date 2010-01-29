@@ -14,6 +14,8 @@ my $_query  = {};
 my $_var    = {};
 
 my $_http;
+my $_cache;
+
 my $_page;
 
 sub new {
@@ -31,6 +33,7 @@ sub init {
   $_query = $self->{_query};
   $_var   = $self->{_var};
   $_http  = $self->{_http};
+  $_cache = $self->{_cache};
 
   $_page  = Saba::Page->new(name => $self->{_name},
                             conf => $_conf,

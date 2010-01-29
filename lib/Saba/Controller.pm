@@ -11,12 +11,14 @@ use Saba::HTTP;
 use Saba::MetaModel;
 use URI::Escape;
 use Encode;
+use Cache::FileCache;
 use Saba::ClassBase qw/:base :debug/;
 
 my $_conf  = {};
 my $_query = {};
-my $_mm;
 my $_http;
+my $_mm;
+my $_cache;
 
 
 sub new {
@@ -33,6 +35,13 @@ sub init {
   $_conf = Saba::Config->new->get;
   $_http = Saba::HTTP->new(conf => $_conf);
   $_mm   = Saba::MetaModel->new(conf => $_conf);
+
+  if ($_conf->{CACHE}{ENABLED}) {
+      $_cache = Cache::FileCache->new({
+          namespace          => $_conf->{CACHE}{NAMESPACE} || 'saba',
+          default_expires_in => $_conf->{CACHE}{EXPIRES}   || 600,
+      });
+  }
 }
 
 
@@ -76,17 +85,21 @@ sub _model {
 
 sub _action {
   my ($self, $action_name) = @_;
-  my $view = { name        => $action_name,
-               action_name => $action_name,
-               var         => {},
-               query       => $_query,
-             };
-  my $action = Saba::Action->new(name  => $action_name,
-                                 conf  => $_conf,
-                                 mm    => $_mm,
-                                 http  => $_http,
-                                 query => $_query,
-                                );
+  my $view = {
+      name        => $action_name,
+      action_name => $action_name,
+      var         => {},
+      query       => $_query,
+      cache       => $_cache,
+  };
+  my $action = Saba::Action->new(
+      name  => $action_name,
+      conf  => $_conf,
+      mm    => $_mm,
+      http  => $_http,
+      query => $_query,
+      cache => $_cache,
+  );
   my $view_ = $action->go;
   $view->{$_} = $view_->{$_}  for qw/name query var/;
 

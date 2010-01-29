@@ -32,7 +32,13 @@ if (-f "$ROOTDIR/.saba") {
 }
 
 
-my ($protocol, $server_name, $subdomain, $request_path);
+my (
+    $protocol,
+    $server_name,
+    $subdomain,
+    $request_path,
+    $cache_enabled,
+);
 #
 #
 #
@@ -48,26 +54,29 @@ else {
         $server_name,
         $subdomain,
         $request_path,
+        $cache_enabled,
     ) = stdin_params();
 }
 
 
-$protocol     ||= 'http';
-$server_name  ||= 'localhost';
-$subdomain    ||= '';
-$request_path ||= '';
-
+$protocol      ||= 'http';
+$server_name   ||= 'localhost';
+$subdomain     ||= '';
+$request_path  ||= '';
+$cache_enabled = 1  unless defined $cache_enabled;
 
 my $SKELDIR = "$BINDIR/skel/setup";
 my $mt = Text::MicroTemplate::Extended->new(
     include_path  => [$SKELDIR],
     template_args => {
-        ROOTDIR      => $ROOTDIR,
-        protocol     => $protocol,
-        server_name  => $server_name,
-        subdomain    => $subdomain,
-        request_path => $request_path,
-        env          => \%ENV,
+        ROOTDIR       => $ROOTDIR,
+        env           => \%ENV,
+
+        protocol      => $protocol,
+        server_name   => $server_name,
+        subdomain     => $subdomain,
+        request_path  => $request_path,
+        cache_enabled => $cache_enabled,
     },
 );
 
@@ -256,11 +265,18 @@ sub stdin_params {
     print "* path? []: ";
     chomp(my $request_path = <STDIN>);
 
+    print "* enable file-cache? (0 or 1) [0]: ";
+    chomp(my $cache_enabled = <STDIN>);
+    if ($cache_enabled !~ /^[01]$/) {
+        $cache_enabled = 1;
+    }
+
     (
         $protocol,
         $server_name,
         $subdomain,
         $request_path,
+        $cache_enabled,
     );
 }
 
