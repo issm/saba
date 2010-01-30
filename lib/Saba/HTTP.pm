@@ -166,7 +166,7 @@ sub remove_cookie {
     my ($self, $name) = @_;
     my $req = $self->{_req};
     my $cookie = $req->cookie(
-        -name    => $name,
+        -name    => en($name),
         -value   => '',
         -expires => -1,
         -domain  => $_conf->{COOKIE}{DOMAIN},
