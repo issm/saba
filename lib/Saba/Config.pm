@@ -5,12 +5,20 @@ use utf8;
 
 use FindBin;
 use Encode qw/is_utf8 encode decode/;
+use Data::Recursive::Encode;
+use Error qw/:try/;
+use File::Basename;
+use Digest::SHA::PurePerl qw/sha1_hex/;
+use Cache::FileCache;
 use Saba::ClassBase qw/:base :debug/;
 
-my $FILENAME_CONF = '.saba';
+my $FILENAME_CONF    = '.saba';
+my $CACHE_NAME       = 'saba_conf';
+my $CACHE_EXPIRES_IN = 10;
+my $CACHED = 0;
 
 my $_conf = {};
-
+my $_cache;
 
 sub new {
   my ($self, $class) = ({}, shift);
@@ -26,17 +34,25 @@ sub init {
   my $bindir  = $ENV{SABA_EXEC_ROOT} || $FindBin::Bin;
   my $YAML_MODULE = '';
 
-  local $@;
-
-  eval {use YAML::Syck;};
-  # YAML::Syck
-  unless ($@) {
-    $YAML_MODULE = 'YAML::Syck';
+  try {
+      eval {use YAML::Syck;};
+      $YAML_MODULE = 'YAML::Syck';
   }
-  # YAML
-  else {
-    eval {use YAML qw/LoadFile/;};
-    $YAML_MODULE = 'YAML';
+  catch Error with {
+      eval {use YAML;};
+      $YAML_MODULE = 'YAML';
+  }
+
+  $_cache = Cache::FileCache->new({
+      namespace          => sha1_hex(dirname __FILE__),
+      default_expires_in => $CACHE_EXPIRES_IN,
+  });
+
+
+  if ($self->_check_cache) {
+      #$self->_cache;
+      $_conf->{YAML_MODULE} = $YAML_MODULE;
+      return;
   }
 
   my $conffile = "$bindir/${FILENAME_CONF}";
@@ -84,24 +100,39 @@ sub init {
           sprintf '%s/', $_conf->{LOCATION}{PATH};
       $_conf->{COOKIE}{PATH} =~ s{^/(.+/)$}{$1};
   }
+
+  try {
+      $_conf = Data::Recursive::Encode->decode('utf-8', $_conf);
+  }
+  finally {
+      $self->_cache;
+  };
+}
+
+# returns $1_or_0
+sub _check_cache {
+    my ($self) = @_;
+    $_conf = $_cache->get($CACHE_NAME);
+    $CACHED = defined $_conf ? 1 : 0;
+}
+
+#
+sub _cache {
+    my ($self) = @_;
+    $_cache->set($CACHE_NAME, $_conf);
 }
 
 
-
-
-
+#
 sub get {
-  my ($self, @name) = @_;
-
-  my $dumped = D([$_conf], ['_conf']);
-  my $decoded
-    = Encode::is_utf8($dumped) ? $dumped : decode('utf-8', $dumped);
-  eval $decoded;
-
-  if (@name) {
-    # todo
-  }
-  else {
-    return $_conf;
-  }
+    my ($self, @name) = @_;
+    if (@name) {
+        # todo
+    }
+    else {
+        return $_conf;
+    }
 }
+
+
+1;
