@@ -19,60 +19,62 @@ my $_http;
 my $_cache;
 
 sub new {
-  my ($self, $class, %param) = ({}, shift, @_);
-  bless $self, $class;
-  $self->{"_$_"} = $param{$_}  for keys %param;
-  $self->init(@_);
-  $self;
+    my ($self, $class, %param) = ({}, shift, @_);
+    bless $self, $class;
+    $self->{"_$_"} = $param{$_}  for keys %param;
+    $self->init(@_);
+    $self;
 }
 
 
 sub init {
-  my ($self) = @_;
-  $_conf  = $self->{_conf};
-  $_mm    = $self->{_mm};
-  $_query = $self->{_query};
-  $_http  = $self->{_http};
-  $_cache = $self->{_cache};
-  $self;
+    my ($self) = @_;
+    $_conf  = $self->{_conf};
+    $_mm    = $self->{_mm};
+    $_query = $self->{_query};
+    $_http  = $self->{_http};
+    $_cache = $self->{_cache};
+    $self;
 }
 
 
 sub go {
-  my ($self) = @_;
-  eval $_mm;
-  eval $_query;
-  eval $_http;
-  eval $_cache;
+    my ($self) = @_;
+    eval $_mm;
+    eval $_query;
+    eval $_http;
+    eval $_cache;
 
-  local $@;
+    local $@;
 
-  my $actionfile = sprintf('%s/%s.pl',
-                           $_conf->{PATH}{ACTION},
-                           name2path($self->{_name}),
-                          );
-  my $action_pl = '1;';
-  if (-f $actionfile) {
-    $action_pl = read_file $actionfile;
-  }
-  eval $action_pl;
-  warn $@  if $@;
+    my $actionfile = sprintf(
+        '%s/%s.pl',
+        $_conf->{PATH}{ACTION},
+        name2path($self->{_name}),
+    );
+    my $action_pl = '1;';
+    if (-f $actionfile) {
+        $action_pl = read_file $actionfile;
+    }
+    eval $action_pl;
+    warn $@  if $@;
 
-  my $ret_action = '';
+    my $ret_action = '';
 
-  my $METH_IF = { GET  => 1,
-                  POST => 1,
-                };
-  for my $meth (qw/BEFORE GET POST AFTER/) {
-    my $cond = $METH_IF->{$meth}
-      ?  sprintf(q|$ENV{REQUEST_METHOD} eq '%s'|, $meth)
-      :  sprintf(q|1|)
-    ;
-    my $meth_pl  = sprintf '%s($self)', $meth;
-    my $meth_alt = sprintf '$self->_%s_ALT()', $meth;
+    my $METH_IF = {
+        GET  => 1,
+        POST => 1,
+    };
+    for my $meth (qw/BEFORE GET POST AFTER/) {
+        my $cond = $METH_IF->{$meth}
+            ?  sprintf(q|$ENV{REQUEST_METHOD} eq '%s'|, $meth)
+            :  sprintf(q|1|)
+        ;
+        my $meth_pl  = sprintf '%s($self)', $meth;
+        my $meth_alt = sprintf '$self->_%s_ALT()', $meth;
 
-    my $eval =
-      sprintf(<< '...'
+        my $eval = sprintf(
+            << '...',
 if (%s) {
   local $@;
   eval {
@@ -84,26 +86,26 @@ if (%s) {
   }
 }
 ...
-,
-              $cond,
-              $meth_pl,
-              $meth_alt,
-             );
-    eval $eval;
-    last  if defined $ret_action  &&  $ret_action ne '';
-  }
+            $cond,
+            $meth_pl,
+            $meth_alt,
+        );
+        eval $eval;
+        last  if defined $ret_action  &&  $ret_action ne '';
+    }
 
-  if (!defined $ret_action
-      ||  $ret_action eq ''
-      ||  $ret_action eq $Saba::FINISH_ACTION
-     ) {
-    $ret_action = $self->{_name};
-  }
+    if (!defined $ret_action
+            ||  $ret_action eq ''
+            ||  $ret_action eq $Saba::FINISH_ACTION
+        ) {
+        $ret_action = $self->{_name};
+    }
 
-  return { name  => $ret_action,
-           query => $_query,
-           var   => $_var,
-         };
+    return +{
+        name  => $ret_action,
+        query => $_query,
+        var   => $_var,
+    };
 
 #  # BEFORE
 #  {
@@ -153,50 +155,50 @@ if (%s) {
 
 
 sub _BEFORE_ALT {
-  '';
+    '';
 }
 
 
 sub _GET_ALT {
-  '';
+    '';
 }
 
 
 sub _POST_ALT {
-  '';
+    '';
 }
 
 
 sub _AFTER_ALT {
-  '';
+    '';
 }
 
 
 sub finish {
-  $Saba::FINISH_ACTION;
+    $Saba::FINISH_ACTION;
 }
 
 
 sub set_var {
-  my ($self, @pairs) = @_;
-  while (@pairs) {
-    my ($name, $value) = (shift @pairs, shift @pairs);
-    last  unless $name && $value;
-    $_var->{$name} = $value;
-  }
+    my ($self, @pairs) = @_;
+    while (@pairs) {
+        my ($name, $value) = (shift @pairs, shift @pairs);
+        last  unless $name && $value;
+        $_var->{$name} = $value;
+    }
 }
 
 sub get_var {
-  my ($self, @names) = @_;
-  # length == 1
-  if ($#names == 0) {
-    return $_var->{$names[0]};
-  }
-  # length > 1
-  else {
-    return
-      map $_var->{$_}, @names;
-  }
+    my ($self, @names) = @_;
+    # length == 1
+    if ($#names == 0) {
+        return $_var->{$names[0]};
+    }
+    # length > 1
+    else {
+        return
+            map $_var->{$_}, @names;
+    }
 }
 
 
