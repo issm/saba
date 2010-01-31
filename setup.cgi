@@ -190,10 +190,12 @@ msg("saved: $CSSDIR/_layout-ie6.css");
 #
 # js ツリーを生成する
 #
-my $JSDIR = "$ROOTDIR/js";
+my $JSDIR     = "$ROOTDIR/js";
+my $JS_JQUERY = "jquery-1.4.1.min.js";
 make_path $JSDIR;
 save_file("$JSDIR/_base.js", read_skel('js/_base.js.mt'));
 save_file("$JSDIR/_base-ie6.js", '');
+save_file("$JSDIR/$JS_JQUERY", read_skel("js/$JS_JQUERY"));
 #
 msg("mkdir: $JSDIR");
 msg("saved: $JSDIR/_base.js");
