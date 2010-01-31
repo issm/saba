@@ -14,7 +14,7 @@ use Saba::ClassBase qw/:base :debug/;
 
 my $FILENAME_CONF    = '.saba';
 my $CACHE_NAME       = 'saba_conf';
-my $CACHE_EXPIRES_IN = 10;
+my $CACHE_EXPIRES_IN = 60;
 my $CACHED = 0;
 
 my $_conf = {};
