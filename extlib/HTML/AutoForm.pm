@@ -26,8 +26,6 @@ our %Lang_Defaults;
 our $DEFAULT_LANG;
 our $CLASS_PREFIX;
 
-sub DEBUG () { $ENV{HTML_AUTOFORM_DEBUG} && 1 }
-
 BEGIN {
     $VERSION = '0.01';
     %Defaults = (
@@ -127,6 +125,7 @@ sub render {
                     $field->render(\@values),
                 );
                 if ($do_validate) {
+                    print STDERR "validating: ", $field->name, "\n";
                     if (my $err = $field->validate($query)) {
                         push(
                             @r,
@@ -178,16 +177,9 @@ sub validate {
     
     for my $f (@{$self->{fields}}) {
         if (my $error = $f->validate($query)) {
-            print STDERR (
-                'validation error:', $f->name, ':', $error->message, "\n",
-            ) if DEBUG;
             return;
         } elsif (my $h = $f->custom) {
             if (my $error = $h->($f, $query)) {
-                print STDERR (
-                    'custom validation error:', $f->name, ':', $error->message,
-                    "\n",
-                ) if DEBUG;
                 return;
             }
         }
@@ -197,19 +189,11 @@ sub validate {
         if (my $csrf_value = $query->param($self->csrf_keyname)) {
             if ($check_csrf_callback->($csrf_value)) {
                 $ok = 1;
-            } else {
-                print STDERR 'csrf validation error:', "\n"
-                    if DEBUG;
             }
-        } else {
-            print STDERR 'no csrf key', "\n"
-                if DEBUG;
         }
         return
             unless $ok;
     }
-    print STDERR "no errors found in validation\n"
-        if DEBUG;
     1;
 }
 
