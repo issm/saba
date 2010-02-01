@@ -7,6 +7,7 @@ use FindBin;
 use Encode;
 use Saba::ClassBase qw/:base :debug/;
 use Error qw/:try/;
+use Saba::HTML::Form;
 use Saba::Error::Action;
 use Saba::Error::Model;
 
@@ -15,6 +16,7 @@ my $_conf  = {};
 my $_mm    = {};
 my $_query = {};
 my $_var   = {};
+my $_form;
 my $_http;
 my $_cache;
 
@@ -33,6 +35,10 @@ sub init {
     $_mm    = $self->{_mm};
     $_query = $self->{_query};
     $_http  = $self->{_http};
+    $_form  = Saba::HTML::Form->new(
+        req => $_http->{_req},
+        conf => $_conf,
+    );
     $_cache = $self->{_cache};
     $self;
 }
@@ -40,10 +46,13 @@ sub init {
 
 sub go {
     my ($self) = @_;
-    eval $_mm;
-    eval $_query;
-    eval $_http;
-    eval $_cache;
+    eval [
+        $_mm,
+        $_query,
+        $_form,
+        $_http,
+        $_cache,
+    ];
 
     local $@;
 
