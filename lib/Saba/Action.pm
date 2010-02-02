@@ -55,15 +55,33 @@ sub go {
     ];
 
     local $@;
+    my $common_pl = '';
+    my $action_pl = '1;';
 
     my $actionfile = sprintf(
         '%s/%s.pl',
         $_conf->{PATH}{ACTION},
         name2path($self->{_name}),
     );
-    my $action_pl = '1;';
+
+    my @commonfiles = ();
+    {
+        (my $dir = $actionfile) =~ s{/[^/]*$}{};
+        do {
+            push @commonfiles, "$dir/_common.pl";
+            last if $dir eq $_conf->{PATH}{ACTION};
+        } while ($dir =~ s{/[^/]*$}{});
+        @commonfiles = reverse @commonfiles;
+    }
+    for my $pl (@commonfiles) {
+        next  unless -f $pl;
+        $common_pl .= read_file $pl;
+    }
+
+
     if (-f $actionfile) {
-        $action_pl = read_file $actionfile;
+        $action_pl = $common_pl;
+        $action_pl .= read_file $actionfile;
     }
     eval $action_pl;
     warn $@  if $@;

@@ -5,28 +5,28 @@
 # $_cache : Cache::FileCache object
 
 sub BEFORE {
-  my $self = shift;
+    my $self = shift;
 
-  '';
+    '';
 }
 
 
 sub GET {
-  my $self = shift;
+    my $self = shift;
 
-  '';
+    '';
 }
 
 
 sub POST {
-  my $self = shift;
+    my $self = shift;
 
-  '';
+    '';
 }
 
 
 sub AFTER {
-  my $self = shift;
+    my $self = shift;
 
-  '';
+    '';
 }
