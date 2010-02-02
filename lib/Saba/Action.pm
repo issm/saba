@@ -6,6 +6,7 @@ use utf8;
 use FindBin;
 use Encode;
 use Saba::ClassBase qw/:base :debug/;
+use JSON;
 use Error qw/:try/;
 use Saba::HTML::Form;
 use Saba::Error::Action;
@@ -71,9 +72,8 @@ sub go {
             push @commonfiles, "$dir/_common.pl";
             last if $dir eq $_conf->{PATH}{ACTION};
         } while ($dir =~ s{/[^/]*$}{});
-        @commonfiles = reverse @commonfiles;
     }
-    for my $pl (@commonfiles) {
+    for my $pl (reverse @commonfiles) {
         next  unless -f $pl;
         $common_pl .= read_file $pl;
     }
