@@ -7,13 +7,13 @@ use base qw(Exporter);
 @JSON::EXPORT = qw(from_json to_json jsonToObj objToJson encode_json decode_json);
 
 BEGIN {
-    $JSON::VERSION = '2.12';
+    $JSON::VERSION = '2.17';
     $JSON::DEBUG   = 0 unless (defined $JSON::DEBUG);
 }
 
 my $Module_XS  = 'JSON::XS';
 my $Module_PP  = 'JSON::PP';
-my $XS_Version = '2.22';
+my $XS_Version = '2.27';
 
 
 # XS and PP common methods
@@ -414,6 +414,7 @@ sub support_by_pp {
         bless  $proto, $pkg;
     };
 
+
     for my $method (@methods) {
         my $flag = uc($method);
         my $type |= (UNSUPPORTED_ENCODE_FLAG->{$flag} || 0);
@@ -441,9 +442,20 @@ sub support_by_pp {
 
 package JSON::Backend::XS::Supportable;
 
+{
+    my $JSON_XS_encode_orignal = \&JSON::XS::encode;
+    my $JSON_XS_decode_orignal = \&JSON::XS::decode;
+    my $JSON_XS_incr_parse_orignal = \&JSON::XS::incr_parse;
 
-my $JSON_XS_encode_orignal = \&JSON::XS::encode;
-my $JSON_XS_decode_orignal = \&JSON::XS::decode;
+    local $^W;
+    *JSON::XS::decode = \&JSON::Backend::XS::Supportable::_decode;
+    *JSON::XS::encode = \&JSON::Backend::XS::Supportable::_encode;
+    *JSON::XS::incr_parse = \&JSON::Backend::XS::Supportable::_incr_parse;
+
+    *{JSON::XS::_original_decode} = $JSON_XS_decode_orignal;
+    *{JSON::XS::_original_encode} = $JSON_XS_encode_orignal;
+    *{JSON::XS::_original_incr_parse} = $JSON_XS_incr_parse_orignal;
+}
 
 $Carp::Internal{'JSON::Backend::XS::Supportable'} = 1;
 
@@ -461,16 +473,6 @@ sub _make_unsupported_method {
         else {
             ${$_[0]} &= ~$type;
         }
-
-        if (${$_[0]}) {
-            *JSON::XS::encode = \&JSON::Backend::XS::Supportable::_encode;
-            *JSON::XS::decode = \&JSON::Backend::XS::Supportable::_decode;
-        }
-        else {
-            *JSON::XS::encode = $JSON_XS_encode_orignal;
-            *JSON::XS::decode = $JSON_XS_decode_orignal;
-        }
-
         $_[0];
     };
 
@@ -507,19 +509,38 @@ sub _set_for_pp {
     return $pp;
 }
 
-
 sub _encode { # using with PP encod
-    _set_for_pp('encode' => @_)->encode($_[1]);
+    if (${$_[0]}) {
+        _set_for_pp('encode' => @_)->encode($_[1]);
+    }
+    else {
+        $_[0]->_original_encode( $_[1] );
+    }
 }
 
 
 sub _decode { # if unsupported-flag is set, use PP
-    _set_for_pp('decode' => @_)->decode($_[1]);
+    if (${$_[0]}) {
+        _set_for_pp('decode' => @_)->decode($_[1]);
+    }
+    else {
+        $_[0]->_original_decode( $_[1] );
+    }
 }
 
 
 sub decode_prefix { # if unsupported-flag is set, use PP
     _set_for_pp('decode' => @_)->decode_prefix($_[1]);
+}
+
+
+sub _incr_parse {
+    if (${$_[0]}) {
+        _set_for_pp('decode' => @_)->incr_parse($_[1]);
+    }
+    else {
+        $_[0]->_original_incr_parse( $_[1] );
+    }
 }
 
 
@@ -586,9 +607,9 @@ JSON - JSON (JavaScript Object Notation) encoder/decoder
 
 =head1 VERSION
 
-    2.11
+    2.17
 
-This version is compatible with JSON::XS B<2.21>.
+This version is compatible with JSON::XS B<2.27> and later.
 
 
 =head1 DESCRIPTION
@@ -1275,8 +1296,8 @@ Converts the given Perl data structure (a simple scalar or a reference
 to a hash or array) to its JSON representation. Simple scalars will be
 converted into JSON string or number sequences, while references to arrays
 become JSON arrays and references to hashes become JSON objects. Undefined
-Perl values (e.g. C<undef>) become JSON C<null> values. Neither C<true>
-nor C<false> values will be generated.
+Perl values (e.g. C<undef>) become JSON C<null> values.
+References to the integers C<0> and C<1> are converted into C<true> and C<false>.
 
 =head2 decode
 
@@ -1287,7 +1308,8 @@ returning the resulting simple scalar or reference. Croaks on error.
 
 JSON numbers and strings become simple Perl scalars. JSON arrays become
 Perl arrayrefs and JSON objects become Perl hashrefs. C<true> becomes
-C<1>, C<false> becomes C<0> and C<null> becomes C<undef>.
+C<1> (C<JSON::true>), C<false> becomes C<0> (C<JSON::false>) and
+C<null> becomes C<undef>.
 
 =head2 decode_prefix
 
@@ -1711,6 +1733,10 @@ objects into JSON numbers.
 
 =back
 
+=head1 JSON and ECMAscript
+
+See to L<JSON::XS/JSON and ECMAscript>.
+
 =head1 JSON and YAML
 
 JSON is not a subset of YAML.
@@ -1783,7 +1809,7 @@ But If you C<use> C<JSON> passing the optional string C<-support_by_pp>,
 it makes a part of those unupported methods available.
 This feature is achieved by using JSON::PP in C<de/encode>.
 
-   BEING { $ENV{PERL_JSON_BACKEND} = 2 } # with JSON::XS
+   BEGIN { $ENV{PERL_JSON_BACKEND} = 2 } # with JSON::XS
    use JSON -support_by_pp;
    my $json = new JSON;
    $json->allow_nonref->escape_slash->encode("/");
@@ -2053,7 +2079,7 @@ The relese of this new version owes to the courtesy of Marc Lehmann.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2005-2008 by Makamaka Hannyaharamitu
+Copyright 2005-2010 by Makamaka Hannyaharamitu
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
