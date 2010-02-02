@@ -7,7 +7,7 @@ use FindBin;
 use Encode qw/is_utf8 encode decode/;
 use Data::Recursive::Encode;
 use Error qw/:try/;
-use File::Basename;
+use File::Spec;
 use Digest::SHA::PurePerl qw/sha1_hex/;
 use Cache::FileCache;
 use Saba::ClassBase qw/:base :debug/;
@@ -44,7 +44,7 @@ sub init {
   }
 
   $_cache = Cache::FileCache->new({
-      namespace          => sha1_hex(dirname __FILE__),
+      namespace          => sha1_hex(File::Spec->rel2abs(__FILE__)),
       default_expires_in => $CACHE_EXPIRES_IN,
   });
 
