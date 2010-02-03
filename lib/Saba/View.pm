@@ -5,6 +5,7 @@ use utf8;
 
 use Text::MicroTemplate::Extended;
 use Encode;
+use HTML::Entities;
 use Saba::Page;
 use Saba::ClassBase qw/:base :debug/;
 
@@ -90,6 +91,11 @@ sub go {
         #    $http_body = << "...";
         #error: $self->{_name}
         #...
+    }
+
+    #warn d $self->{_no_escape};
+    if ($self->{_no_escape}) {
+        $http_body = decode_entities $http_body;
     }
 
     print encode('utf-8', << "...");

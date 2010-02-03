@@ -21,6 +21,8 @@ my $_form;
 my $_http;
 my $_cache;
 
+my $_view_no_escape = 0;
+
 sub new {
     my ($self, $class, %param) = ({}, shift, @_);
     bless $self, $class;
@@ -129,9 +131,10 @@ if (%s) {
     }
 
     return +{
-        name  => $ret_action,
-        query => $_query,
-        var   => $_var,
+        name      => $ret_action,
+        no_escape => $_view_no_escape,
+        query     => $_query,
+        var       => $_var,
     };
 
 #  # BEFORE
@@ -226,6 +229,13 @@ sub get_var {
         return
             map $_var->{$_}, @names;
     }
+}
+
+
+sub view_no_escape {
+    my ($self, $value) = @_;
+    $value = 1  unless defined $value;
+    $_view_no_escape = $value ? 1 : 0;
 }
 
 

@@ -52,6 +52,10 @@ sub go {
 
     #
     $_query = $self->{_req}->Vars;
+    # クエリパラメータの値をデコードする
+    for my $k (grep $_ !~ /^\./, keys %$_query) {
+        $_query->{$k} = de $_query->{$k};
+    }
 
     #
     my $mapper = Saba::URLMapper->new(conf => $_conf);
@@ -88,6 +92,7 @@ sub _action {
     my $view = {
         name        => $action_name,
         action_name => $action_name,
+        no_escape   => 0,
         var         => {},
         query       => $_query,
         cache       => $_cache,
@@ -101,7 +106,7 @@ sub _action {
         cache => $_cache,
     );
     my $view_ = $action->go;
-    $view->{$_} = $view_->{$_}  for qw/name query var/;
+    $view->{$_} = $view_->{$_}  for qw/name no_escape query var/;
 
     $view;
 }
@@ -113,6 +118,7 @@ sub _view {
     my $view = Saba::View->new(
         name        => $v->{name},
         action_name => $v->{action_name},
+        no_escape   => $v->{no_escape},
         conf        => $_conf,
         http        => $_http,
         query       => $v->{query},
