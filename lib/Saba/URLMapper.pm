@@ -5,14 +5,22 @@ use utf8;
 
 use FindBin;
 use URI::Escape;
+use File::Spec;
+use Digest::SHA::PurePerl qw/sha1_hex/;
+use Cache::FileCache;
 use Saba::ClassBase qw/:base :debug/;
 
-my $FILENAME_MAP = '.urlmap';
+our $CACHE_EXPIRES_IN = 60;
+
+my $FILENAME_MAP     = '.urlmap';
+my $CACHE_NAME       = 'saba_urlmap';
+
 my $bin = $FindBin::Bin;
 
 my $_conf     = {};
 my $_map_rule = [];
 my $_map_var  = {};
+my $_cache;
 
 sub new {
   my ($self, $class, %param) = ({}, shift, @_);
@@ -27,10 +35,21 @@ sub init {
   my ($self) = self_param @_;
   $_conf = $self->{_conf};
 
+  $_cache = Cache::FileCache->new({
+      namespace          => sha1_hex(File::Spec->rel2abs(__FILE__)),
+      default_expires_in => $CACHE_EXPIRES_IN,
+  });
+
   local $@;
   eval sprintf 'use %s qw/LoadFile/;', $_conf->{YAML_MODULE};
   my $urlmapfile = "$bin/${FILENAME_MAP}";
-  my $map = LoadFile($urlmapfile);
+
+  my $map = $_cache->get($CACHE_NAME);
+  unless (defined $map) {
+      $map = LoadFile($urlmapfile);
+      $_cache->set($CACHE_NAME, $map);
+  }
+
   $_map_rule = $map->{ACTION} || {};
   $_map_var  = $map->{VAR}  || {};
 }

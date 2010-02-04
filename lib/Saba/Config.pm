@@ -12,9 +12,10 @@ use Digest::SHA::PurePerl qw/sha1_hex/;
 use Cache::FileCache;
 use Saba::ClassBase qw/:base :debug/;
 
+our $CACHE_EXPIRES_IN = 60;
+
 my $FILENAME_CONF    = '.saba';
 my $CACHE_NAME       = 'saba_conf';
-my $CACHE_EXPIRES_IN = 60;
 my $CACHED = 0;
 
 my $_conf = {};
