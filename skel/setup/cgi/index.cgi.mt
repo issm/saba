@@ -6,6 +6,7 @@ use utf8;
 BEGIN {
   unshift @INC, qw(saba/lib saba/extlib);
 }
+use CGI::Carp qw/fatalsToBrowser/;
 use Saba;
 
 Saba->run;
