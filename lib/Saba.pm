@@ -13,7 +13,6 @@ use Saba::ClassBase qw/:base :debug/;
 our $FINISH_ACTION = '__FINISH_ACTION__';
 
 
-
 sub run {
   my $self = shift;
   my $req = CGI::Simple->new;

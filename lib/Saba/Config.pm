@@ -36,11 +36,13 @@ sub init {
   my $YAML_MODULE = '';
 
   try {
-      eval {use YAML::Syck;};
+      local $@;
+      eval "use YAML::Syck;";
+      throw Error  if $@;
       $YAML_MODULE = 'YAML::Syck';
   }
   catch Error with {
-      eval {use YAML;};
+      eval "use YAML qw/LoadFile DumpFile/;";
       $YAML_MODULE = 'YAML';
   }
 
