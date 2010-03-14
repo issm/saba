@@ -80,15 +80,15 @@ sub init {
            );
 
   # PATH
-  $_conf->{PATH} =
-    {ROOT     => $bindir,
-     CONF     => "$bindir/saba/etc",
-     DATA     => "$bindir/data",
-     ACTION   => "$bindir/action",
-     MODEL    => "$bindir/model",
-     TEMPLATE => "$bindir/template",
-     TMP      => "$bindir/tmp",
-    };
+  $_conf->{PATH} = {
+      ROOT     => $bindir,
+      CONF     => "$bindir/saba/etc",
+      DATA     => "$bindir/data",
+      ACTION   => "$bindir/action",
+      MODEL    => "$bindir/model",
+      TEMPLATE => "$bindir/template",
+      TMP      => "$bindir/tmp",
+  };
 
   # COOKIE
   unless (defined $_conf->{COOKIE}{DOMAON}) {
