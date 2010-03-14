@@ -37,10 +37,19 @@ sub init {
     $_mm   = Saba::MetaModel->new(conf => $_conf);
 
     if ($_conf->{CACHE}{ENABLED}) {
-        $_cache = Cache::FileCache->new({
+        my $opts = {
             namespace          => $_conf->{CACHE}{NAMESPACE} || 'saba',
             default_expires_in => $_conf->{CACHE}{EXPIRES}   || 600,
-        });
+        };
+
+        if (my $root = $_conf->{CACHE}{ROOT}) {
+            $opts->{cache_root} = ($root =~ m{^/})
+                ? $root
+                : sprintf('%s/%s', $_conf->{PATH}{ROOT}, $root);
+            # ^ '/' で始まる場合は絶対パス，でなければ相対パス
+        }
+
+        $_cache = Cache::FileCache->new($opts);
     }
 }
 
