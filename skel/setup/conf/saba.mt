@@ -25,6 +25,7 @@ CACHE:
   ENABLED:   <?= $cache_enabled; ?>
   NAMESPACE: <?= $subdomain; ?><?= $server_name; ?>
   EXPIRES:   600
+  ROOT:
 
 COOKIE:
   EXPIRES: +14d
