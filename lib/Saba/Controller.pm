@@ -47,6 +47,14 @@ sub init {
                 ? $root
                 : sprintf('%s/%s', $_conf->{PATH}{ROOT}, $root);
             # ^ '/' で始まる場合は絶対パス，でなければ相対パス
+
+            my @dirs;
+            for my $d (split '/', $opts->{cache_root}) {
+                next  if $d eq '.';
+                if ($d eq '..') { pop @dirs; next; }
+                push @dirs, $d;
+            }
+            $opts->{cache_root} = join '/', @dirs;
         }
 
         $_cache = Cache::FileCache->new($opts);
